@@ -37,11 +37,12 @@ const rest = new REST({version:"10"})
 
 (async()=>{
  await rest.put(
- Routes.applicationCommands(CLIENT_ID),
+ Routes.applicationGuildCommands(
+  CLIENT_ID,
+  "1519659693025525881"
+ ),
  {body:commands}
- );
- console.log("Commands loaded");
-})();
+);
 
 
 
