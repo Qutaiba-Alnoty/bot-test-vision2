@@ -1,9 +1,14 @@
 const http = require("http");
 
+const PORT = process.env.PORT || 3000;
+
 http.createServer((req, res) => {
-  res.write("Bot is alive!");
-  res.end();
-}).listen(process.env.PORT || 3000);
+  res.writeHead(200);
+  res.end("Bot is alive!");
+}).listen(PORT, "0.0.0.0", () => {
+  console.log(`Web server running on ${PORT}`);
+});
+
 const {
 Client,
 GatewayIntentBits,
