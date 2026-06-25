@@ -41,6 +41,9 @@ const client = new Client({
 const completedUsers = new Set();
 
 
+const activeTests = new Map();
+
+
 
 const questions = [
 
@@ -70,7 +73,7 @@ a:[
 ["Act immediately","pyro"],
 ["Adapt quickly","anemo"],
 ["Think deeper","dendro"],
-["Stay firm","geo"]
+["Stand firm","geo"]
 ]
 },
 
@@ -164,49 +167,12 @@ await member.roles.add(role);
 
 
 
-client.on(
-Events.InteractionCreate,
-async interaction=>{
 
+function buttonsFor(userId){
 
+let test = activeTests.get(userId);
 
-if(
-interaction.isChatInputCommand() &&
-interaction.commandName==="visiontest"
-){
-
-
-
-if(completedUsers.has(interaction.user.id)){
-
-return interaction.reply({
-content:
-"✨ Your fate has already been decided. You only receive one Vision.",
-ephemeral:true
-});
-
-}
-
-
-
-let session={
-index:0,
-scores:{
-pyro:0,
-hydro:0,
-cryo:0,
-anemo:0,
-geo:0,
-electro:0,
-dendro:0
-}
-};
-
-
-
-function makeButtons(){
-
-let q=questions[session.index];
+let q = questions[test.index];
 
 
 return new ActionRowBuilder()
@@ -238,6 +204,50 @@ new ButtonBuilder()
 
 
 
+
+client.on(
+Events.InteractionCreate,
+async interaction=>{
+
+
+
+if(
+interaction.isChatInputCommand() &&
+interaction.commandName==="visiontest"
+){
+
+
+
+if(completedUsers.has(interaction.user.id)){
+
+return interaction.reply({
+content:
+"✨ Your fate has already been decided. You only receive one Vision.",
+ephemeral:true
+});
+
+}
+
+
+
+activeTests.set(
+interaction.user.id,
+{
+index:0,
+scores:{
+pyro:0,
+hydro:0,
+cryo:0,
+anemo:0,
+geo:0,
+electro:0,
+dendro:0
+}
+}
+);
+
+
+
 await interaction.reply({
 
 content:
@@ -246,7 +256,7 @@ content:
 ${questions[0].q}`,
 
 components:[
-makeButtons()
+buttonsFor(interaction.user.id)
 ],
 
 ephemeral:true
@@ -255,40 +265,59 @@ ephemeral:true
 
 
 
-client.once(
-Events.InteractionCreate,
-async btn=>{
+}
 
-if(!btn.isButton()) return;
 
-if(btn.user.id!==interaction.user.id)
-return;
+
+
+
+if(interaction.isButton()){
+
+
+let test =
+activeTests.get(interaction.user.id);
+
+
+
+if(!test){
+
+return interaction.reply({
+content:"No active Vision test.",
+ephemeral:true
+});
+
+}
 
 
 
 let choice =
-Number(btn.customId.replace("answer",""));
+Number(
+interaction.customId.replace("answer","")
+);
+
 
 
 let element =
-questions[session.index]
+questions[test.index]
 .a[choice][1];
 
 
-session.scores[element]++;
+
+test.scores[element]++;
 
 
-session.index++;
+test.index++;
 
 
 
-if(session.index >= questions.length){
+if(test.index >= questions.length){
+
 
 
 let vision =
-Object.keys(session.scores)
+Object.keys(test.scores)
 .reduce((a,b)=>
-session.scores[a]>=session.scores[b]?a:b);
+test.scores[a]>=test.scores[b]?a:b);
 
 
 
@@ -324,6 +353,7 @@ if(role)
 await interaction.member.roles.add(role);
 
 
+
 if(old)
 await interaction.member.roles.remove(old);
 
@@ -335,7 +365,13 @@ interaction.user.id
 
 
 
-return btn.update({
+activeTests.delete(
+interaction.user.id
+);
+
+
+
+return interaction.update({
 
 content:
 `✨ A Vision has descended from Celestia! ✨
@@ -354,19 +390,16 @@ components:[]
 
 
 
-btn.update({
+await interaction.update({
 
 content:
 `✨ Vision Ceremony ✨
 
-${questions[session.index].q}`,
+${questions[test.index].q}`,
 
 components:[
-makeButtons()
+buttonsFor(interaction.user.id)
 ]
-
-});
-
 
 });
 
@@ -374,6 +407,7 @@ makeButtons()
 
 
 });
+
 
 
 
