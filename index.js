@@ -363,6 +363,8 @@ completedUsers.add(
 interaction.user.id
 );
 
+saveUsers(completedUsers);
+
 
 
 activeTests.delete(
