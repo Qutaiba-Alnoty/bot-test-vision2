@@ -16,7 +16,10 @@ GatewayIntentBits,
 Events,
 SlashCommandBuilder,
 REST,
-Routes
+Routes,
+ActionRowBuilder,
+ButtonBuilder,
+ButtonStyle
 } = require("discord.js");
 
 
@@ -34,8 +37,9 @@ const client = new Client({
 });
 
 
-// one Vision only
+
 const completedUsers = new Set();
+
 
 
 const questions = [
@@ -43,19 +47,19 @@ const questions = [
 {
 q:"A dream seems impossible. What do you do?",
 a:[
-["Continue forward even alone","pyro"],
+["Continue forward","pyro"],
 ["Find another route","anemo"],
-["Protect those with me","geo"],
-["Understand the problem first","dendro"]
+["Protect others","geo"],
+["Understand the problem","dendro"]
 ]
 },
 
 {
 q:"People trust you because you are...",
 a:[
-["Strong and determined","electro"],
-["Patient and calm","cryo"],
-["Supportive and understanding","hydro"],
+["Determined","electro"],
+["Patient","cryo"],
+["Supportive","hydro"],
 ["Reliable","geo"]
 ]
 },
@@ -63,19 +67,19 @@ a:[
 {
 q:"When challenged you...",
 a:[
-["Prove yourself through action","pyro"],
+["Act immediately","pyro"],
 ["Adapt quickly","anemo"],
 ["Think deeper","dendro"],
-["Stand firm","geo"]
+["Stay firm","geo"]
 ]
 },
 
 {
 q:"Your greatest strength is...",
 a:[
-["Willpower","electro"],
+["Ambition","electro"],
 ["Freedom","anemo"],
-["Compassion","hydro"],
+["Kindness","hydro"],
 ["Endurance","cryo"]
 ]
 },
@@ -84,14 +88,14 @@ a:[
 q:"During a crisis you...",
 a:[
 ["Take control","electro"],
-["Create a plan","dendro"],
-["Help everyone cooperate","hydro"],
-["Stay steady","cryo"]
+["Create solutions","dendro"],
+["Unite people","hydro"],
+["Remain calm","cryo"]
 ]
 },
 
 {
-q:"What do you value most?",
+q:"What matters most to you?",
 a:[
 ["Achievement","pyro"],
 ["Truth","dendro"],
@@ -103,9 +107,9 @@ a:[
 {
 q:"After failure you...",
 a:[
-["Try again stronger","pyro"],
-["Change your approach","hydro"],
-["Learn from it","cryo"],
+["Try again","pyro"],
+["Change approach","hydro"],
+["Learn","cryo"],
 ["Protect what remains","geo"]
 ]
 }
@@ -113,11 +117,13 @@ a:[
 ];
 
 
+
 const commands=[
  new SlashCommandBuilder()
  .setName("visiontest")
  .setDescription("Take your Vision ceremony")
 ].map(c=>c.toJSON());
+
 
 
 const rest=new REST({version:"10"})
@@ -128,11 +134,11 @@ const rest=new REST({version:"10"})
 (async()=>{
 
 await rest.put(
- Routes.applicationGuildCommands(
-  CLIENT_ID,
-  GUILD_ID
- ),
- {body:commands}
+Routes.applicationGuildCommands(
+CLIENT_ID,
+GUILD_ID
+),
+{body:commands}
 );
 
 console.log("Commands loaded");
@@ -157,23 +163,25 @@ await member.roles.add(role);
 
 
 
+
 client.on(
 Events.InteractionCreate,
 async interaction=>{
 
 
-if(!interaction.isChatInputCommand())
-return;
 
+if(
+interaction.isChatInputCommand() &&
+interaction.commandName==="visiontest"
+){
 
-if(interaction.commandName==="visiontest"){
 
 
 if(completedUsers.has(interaction.user.id)){
 
 return interaction.reply({
 content:
-"✨ Your fate has already been decided. A person receives only one Vision.",
+"✨ Your fate has already been decided. You only receive one Vision.",
 ephemeral:true
 });
 
@@ -181,7 +189,9 @@ ephemeral:true
 
 
 
-let scores={
+let session={
+index:0,
+scores:{
 pyro:0,
 hydro:0,
 cryo:0,
@@ -189,72 +199,96 @@ anemo:0,
 geo:0,
 electro:0,
 dendro:0
+}
 };
 
 
-let current=0;
+
+function makeButtons(){
+
+let q=questions[session.index];
+
+
+return new ActionRowBuilder()
+.addComponents(
+
+new ButtonBuilder()
+.setCustomId("answer0")
+.setLabel(q.a[0][0])
+.setStyle(ButtonStyle.Secondary),
+
+new ButtonBuilder()
+.setCustomId("answer1")
+.setLabel(q.a[1][0])
+.setStyle(ButtonStyle.Secondary),
+
+new ButtonBuilder()
+.setCustomId("answer2")
+.setLabel(q.a[2][0])
+.setStyle(ButtonStyle.Secondary),
+
+new ButtonBuilder()
+.setCustomId("answer3")
+.setLabel(q.a[3][0])
+.setStyle(ButtonStyle.Secondary)
+
+);
+
+}
 
 
 
 await interaction.reply({
+
 content:
 `✨ Vision Ceremony ✨
 
-${questions[current].q}
+${questions[0].q}`,
 
-1) ${questions[current].a[0][0]}
-2) ${questions[current].a[1][0]}
-3) ${questions[current].a[2][0]}
-4) ${questions[current].a[3][0]}
+components:[
+makeButtons()
+],
 
-Reply with 1-4`,
 ephemeral:true
+
 });
 
 
 
-const collector =
-interaction.channel.createMessageCollector({
-filter:m=>m.author.id===interaction.user.id,
-time:120000
-});
+client.once(
+Events.InteractionCreate,
+async btn=>{
 
+if(!btn.isButton()) return;
 
+if(btn.user.id!==interaction.user.id)
+return;
 
-collector.on(
-"collect",
-async msg=>{
 
 
 let choice =
-Number(msg.content)-1;
+Number(btn.customId.replace("answer",""));
 
 
-if(choice<0 || choice>3)
-return msg.reply("Reply with 1-4");
+let element =
+questions[session.index]
+.a[choice][1];
 
 
-scores[
-questions[current].a[choice][1]
-]++;
+session.scores[element]++;
 
 
-
-current++;
+session.index++;
 
 
 
-if(current>=questions.length){
-
-
-collector.stop();
-
+if(session.index >= questions.length){
 
 
 let vision =
-Object.keys(scores)
+Object.keys(session.scores)
 .reduce((a,b)=>
-scores[a]>=scores[b]?a:b);
+session.scores[a]>=session.scores[b]?a:b);
 
 
 
@@ -301,34 +335,37 @@ interaction.user.id
 
 
 
-return msg.reply(
+return btn.update({
+
+content:
 `✨ A Vision has descended from Celestia! ✨
 
 Congratulations ${interaction.user}
 
 Your fate has been recognized.
 
-You received a ${names[vision]}.`
-);
+You received a ${names[vision]}.`,
 
+components:[]
 
+});
 
 }
 
 
 
-let q=questions[current];
+btn.update({
 
+content:
+`✨ Vision Ceremony ✨
 
-msg.reply(
-`${q.q}
+${questions[session.index].q}`,
 
-1) ${q.a[0][0]}
-2) ${q.a[1][0]}
-3) ${q.a[2][0]}
-4) ${q.a[3][0]}`
-);
+components:[
+makeButtons()
+]
 
+});
 
 
 });
