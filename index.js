@@ -1,4 +1,5 @@
 const http = require("http");
+const fs = require("fs");
 
 const PORT = process.env.PORT || 3000;
 
@@ -29,23 +30,54 @@ const CLIENT_ID = "1519773601438503002";
 const GUILD_ID = "1519659693025525881";
 
 
+const DATA_FILE="./users.json";
+
+
+function loadUsers(){
+
+if(!fs.existsSync(DATA_FILE))
+return new Set();
+
+
+return new Set(
+JSON.parse(
+fs.readFileSync(DATA_FILE)
+)
+);
+
+}
+
+
+
+function saveUsers(users){
+
+fs.writeFileSync(
+DATA_FILE,
+JSON.stringify([...users])
+);
+
+}
+
+
+
+const completedUsers = loadUsers();
+
+
+
 const client = new Client({
- intents:[
-  GatewayIntentBits.Guilds,
-  GatewayIntentBits.GuildMembers
- ]
+intents:[
+GatewayIntentBits.Guilds,
+GatewayIntentBits.GuildMembers
+]
 });
 
-
-
-const completedUsers = new Set();
 
 
 const activeTests = new Map();
 
 
 
-const questions = [
+const questions=[
 
 {
 q:"A dream seems impossible. What do you do?",
@@ -122,9 +154,9 @@ a:[
 
 
 const commands=[
- new SlashCommandBuilder()
- .setName("visiontest")
- .setDescription("Take your Vision ceremony")
+new SlashCommandBuilder()
+.setName("visiontest")
+.setDescription("Take your Vision ceremony")
 ].map(c=>c.toJSON());
 
 
@@ -150,6 +182,7 @@ console.log("Commands loaded");
 
 
 
+
 client.on(
 Events.GuildMemberAdd,
 async member=>{
@@ -158,6 +191,7 @@ let role =
 member.guild.roles.cache.find(
 r=>r.name==="Unawakened Traveler"
 );
+
 
 if(role)
 await member.roles.add(role);
@@ -168,11 +202,11 @@ await member.roles.add(role);
 
 
 
-function buttonsFor(userId){
+function makeButtons(user){
 
-let test = activeTests.get(userId);
+let test=activeTests.get(user);
 
-let q = questions[test.index];
+let q=questions[test.index];
 
 
 return new ActionRowBuilder()
@@ -205,6 +239,7 @@ new ButtonBuilder()
 
 
 
+
 client.on(
 Events.InteractionCreate,
 async interaction=>{
@@ -215,7 +250,6 @@ if(
 interaction.isChatInputCommand() &&
 interaction.commandName==="visiontest"
 ){
-
 
 
 if(completedUsers.has(interaction.user.id)){
@@ -243,12 +277,11 @@ geo:0,
 electro:0,
 dendro:0
 }
-}
-);
+});
 
 
 
-await interaction.reply({
+return interaction.reply({
 
 content:
 `✨ Vision Ceremony ✨
@@ -256,17 +289,14 @@ content:
 ${questions[0].q}`,
 
 components:[
-buttonsFor(interaction.user.id)
+makeButtons(interaction.user.id)
 ],
 
 ephemeral:true
 
 });
 
-
-
 }
-
 
 
 
@@ -279,14 +309,8 @@ activeTests.get(interaction.user.id);
 
 
 
-if(!test){
-
-return interaction.reply({
-content:"No active Vision test.",
-ephemeral:true
-});
-
-}
+if(!test)
+return;
 
 
 
@@ -302,7 +326,6 @@ questions[test.index]
 .a[choice][1];
 
 
-
 test.scores[element]++;
 
 
@@ -310,7 +333,11 @@ test.index++;
 
 
 
+
 if(test.index >= questions.length){
+
+
+await interaction.deferUpdate();
 
 
 
@@ -363,6 +390,7 @@ completedUsers.add(
 interaction.user.id
 );
 
+
 saveUsers(completedUsers);
 
 
@@ -373,7 +401,7 @@ interaction.user.id
 
 
 
-return interaction.update({
+return interaction.editReply({
 
 content:
 `✨ A Vision has descended from Celestia! ✨
@@ -388,11 +416,13 @@ components:[]
 
 });
 
+
 }
 
 
 
-await interaction.update({
+
+return interaction.update({
 
 content:
 `✨ Vision Ceremony ✨
@@ -400,16 +430,15 @@ content:
 ${questions[test.index].q}`,
 
 components:[
-buttonsFor(interaction.user.id)
+makeButtons(interaction.user.id)
 ]
 
 });
 
+
 }
 
-
 });
-
 
 
 
