@@ -1,5 +1,6 @@
 const http = require("http");
 const fs = require("fs");
+const mongoose = require("mongoose");
 
 const PORT = process.env.PORT || 3000;
 
@@ -26,41 +27,28 @@ ButtonStyle
 
 const TOKEN = process.env.TOKEN;
 
+
+// MongoDB connection
+mongoose.connect(process.env.MONGO_URI)
+.then(()=>console.log("MongoDB connected"))
+.catch(err=>console.log("Mongo error:",err));
+
+
+const userSchema = new mongoose.Schema({
+    userId:String
+});
+
+
+const User = mongoose.model("User", userSchema);
+
+
+
 const CLIENT_ID = "1519773601438503002";
 const GUILD_ID = "1519659693025525881";
 
 
-const DATA_FILE="./users.json";
 
-
-function loadUsers(){
-
-if(!fs.existsSync(DATA_FILE))
-return new Set();
-
-
-return new Set(
-JSON.parse(
-fs.readFileSync(DATA_FILE)
-)
-);
-
-}
-
-
-
-function saveUsers(users){
-
-fs.writeFileSync(
-DATA_FILE,
-JSON.stringify([...users])
-);
-
-}
-
-
-
-const completedUsers = loadUsers();
+const completedUsers = new Set();
 
 
 
@@ -183,24 +171,6 @@ console.log("Commands loaded");
 
 
 
-client.on(
-Events.GuildMemberAdd,
-async member=>{
-
-let role =
-member.guild.roles.cache.find(
-r=>r.name==="Unawakened Traveler"
-);
-
-
-if(role)
-await member.roles.add(role);
-
-});
-
-
-
-
 
 function makeButtons(user){
 
@@ -245,14 +215,18 @@ Events.InteractionCreate,
 async interaction=>{
 
 
-
 if(
 interaction.isChatInputCommand() &&
 interaction.commandName==="visiontest"
 ){
 
 
-if(completedUsers.has(interaction.user.id)){
+const exists = await User.findOne({
+userId:interaction.user.id
+});
+
+
+if(exists){
 
 return interaction.reply({
 content:
@@ -328,8 +302,8 @@ questions[test.index]
 
 test.scores[element]++;
 
-
 test.index++;
+
 
 
 
@@ -386,12 +360,9 @@ await interaction.member.roles.remove(old);
 
 
 
-completedUsers.add(
-interaction.user.id
-);
-
-
-saveUsers(completedUsers);
+await User.create({
+userId:interaction.user.id
+});
 
 
 
@@ -440,56 +411,54 @@ makeButtons(interaction.user.id)
 
 });
 
+
+
 // 🌟 Rank Emoji Nickname System
 
 client.on("guildMemberUpdate", async (oldMember, newMember) => {
 
-    const rankEmojis = {
-        "🌱 Traveler": "🌱",
-        "🧭 Adventurer": "🧭",
-        "⚔️ Honorary Knight": "⚔️",
-        "🛡️ Captain": "🛡️",
-        "⭐ Grandmaster": "⭐",
-        "👑 Archon": "👑"
-    };
+const rankEmojis = {
+"🌱 Traveler":"🌱",
+"🧭 Adventurer":"🧭",
+"⚔️ Honorary Knight":"⚔️",
+"🛡️ Captain":"🛡️",
+"⭐ Grandmaster":"⭐",
+"👑 Archon":"👑"
+};
 
 
-    let emoji = null;
+let emoji=null;
 
 
-    for (const role of newMember.roles.cache.values()) {
-        if (rankEmojis[role.name]) {
-            emoji = rankEmojis[role.name];
-        }
-    }
+for(const role of newMember.roles.cache.values()){
+if(rankEmojis[role.name]){
+emoji=rankEmojis[role.name];
+}
+}
 
 
-    if (!emoji) return;
+if(!emoji)return;
 
 
-    let nickname = newMember.nickname || newMember.user.username;
+let nickname =
+newMember.nickname ||
+newMember.user.username;
 
 
-    // removes old rank emoji before adding new one
-    nickname = nickname.replace(
-        /^[🌱🧭⚔️🛡️⭐👑]\s*/,
-        ""
-    );
+
+nickname=nickname.replace(
+/^[🌱🧭⚔️🛡️⭐👑]\s*/,
+""
+);
 
 
-    await newMember.setNickname(
-        `${emoji} ${nickname}`
-    ).catch(() => {});
 
+await newMember.setNickname(
+`${emoji} ${nickname}`
+).catch(()=>{});
 
 });
 
+
+
 client.login(TOKEN);
-
-
-
-
-
-
-
-
