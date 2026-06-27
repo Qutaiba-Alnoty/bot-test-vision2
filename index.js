@@ -415,29 +415,51 @@ makeButtons(interaction.user.id)
 
 // 🌟 Rank Emoji Nickname System
 
+// 🌟 Rank Emoji Nickname System
+
 client.on("guildMemberUpdate", async (oldMember, newMember) => {
 
+console.log("🌟 ROLE UPDATE DETECTED:", newMember.user.username);
+
+
 const rankEmojis = {
+
 "🌱 Traveler":"🌱",
 "🧭 Adventurer":"🧭",
 "⚔️ Honorary Knight":"⚔️",
 "🛡️ Captain":"🛡️",
 "⭐ Grandmaster":"⭐",
 "👑 Archon":"👑"
+
 };
 
 
-let emoji=null;
+let emoji = null;
 
 
-for(const role of newMember.roles.cache.values()){
-if(rankEmojis[role.name]){
-emoji=rankEmojis[role.name];
+for (const role of newMember.roles.cache.values()) {
+
+console.log("Role found:", role.name);
+
+
+if (rankEmojis[role.name]) {
+
+emoji = rankEmojis[role.name];
+
 }
+
 }
 
 
-if(!emoji)return;
+
+if (!emoji) {
+
+console.log("No rank emoji role found");
+
+return;
+
+}
+
 
 
 let nickname =
@@ -446,7 +468,7 @@ newMember.user.username;
 
 
 
-nickname=nickname.replace(
+nickname = nickname.replace(
 /^[🌱🧭⚔️🛡️⭐👑]\s*/,
 ""
 );
@@ -455,9 +477,21 @@ nickname=nickname.replace(
 
 await newMember.setNickname(
 `${emoji} ${nickname}`
-).catch(()=>{});
+)
+.then(() => {
+
+console.log("Nickname changed!");
+
+})
+.catch(err => {
+
+console.log("Nickname error:", err.message);
 
 });
+
+
+});
+
 
 
 
