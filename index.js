@@ -466,11 +466,9 @@ let nickname =
 newMember.nickname ||
 newMember.user.username;
 
-
-
-nickname = nickname.replace(
-/^[🌱🧭⚔️🛡️⭐👑]\s*/,
-""
+nickname = nickname
+.replace(/^[🌱🧭⚔️🛡️⭐👑]\s*/, "")
+.trim();
 );
 
 
