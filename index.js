@@ -419,9 +419,6 @@ makeButtons(interaction.user.id)
 
 client.on("guildMemberUpdate", async (oldMember, newMember) => {
 
-console.log("🌟 ROLE UPDATE DETECTED:", newMember.user.username);
-
-
 const rankEmojis = {
 
 "🌱 Traveler":"🌱",
@@ -439,9 +436,6 @@ let emoji = null;
 
 for (const role of newMember.roles.cache.values()) {
 
-console.log("Role found:", role.name);
-
-
 if (rankEmojis[role.name]) {
 
 emoji = rankEmojis[role.name];
@@ -451,42 +445,28 @@ emoji = rankEmojis[role.name];
 }
 
 
-
-if (!emoji) {
-
-console.log("No rank emoji role found");
-
-return;
-
-}
-
+if (!emoji) return;
 
 
 let nickname =
 newMember.nickname ||
 newMember.user.username;
 
+
 nickname = nickname
 .replace(/^[🌱🧭⚔️🛡️⭐👑]\s*/, "")
 .trim();
-);
-
 
 
 await newMember.setNickname(
 `${emoji} ${nickname}`
-)
-.then(() => {
+).catch(()=>{});
 
-console.log("Nickname changed!");
-
-})
-.catch(err=>{
-console.error(err);
 
 });
 
-});
+
+client.login(TOKEN);
 
 
 client.login(TOKEN);
