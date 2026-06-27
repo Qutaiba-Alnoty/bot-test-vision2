@@ -440,6 +440,56 @@ makeButtons(interaction.user.id)
 
 });
 
+// 🌟 Rank Emoji Nickname System
 
+client.on("guildMemberUpdate", async (oldMember, newMember) => {
+
+    const rankEmojis = {
+        "🌱 Traveler": "🌱",
+        "🧭 Adventurer": "🧭",
+        "⚔️ Honorary Knight": "⚔️",
+        "🛡️ Captain": "🛡️",
+        "⭐ Grandmaster": "⭐",
+        "👑 Archon": "👑"
+    };
+
+
+    let emoji = null;
+
+
+    for (const role of newMember.roles.cache.values()) {
+        if (rankEmojis[role.name]) {
+            emoji = rankEmojis[role.name];
+        }
+    }
+
+
+    if (!emoji) return;
+
+
+    let nickname = newMember.nickname || newMember.user.username;
+
+
+    // removes old rank emoji before adding new one
+    nickname = nickname.replace(
+        /^[🌱🧭⚔️🛡️⭐👑]\s*/,
+        ""
+    );
+
+
+    await newMember.setNickname(
+        `${emoji} ${nickname}`
+    ).catch(() => {});
+
+
+});
 
 client.login(TOKEN);
+
+
+
+
+
+
+
+
