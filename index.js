@@ -459,7 +459,7 @@ nickname = nickname
 
 
 await newMember.setNickname(
-`${emoji} ${nickname}`
+`${emoji}\u200A${nickname}`
 ).catch(()=>{});
 
 
