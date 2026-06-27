@@ -483,16 +483,12 @@ await newMember.setNickname(
 console.log("Nickname changed!");
 
 })
-.catch(err => {
-
-console.log("Nickname error:", err.message);
-
-});
-
+.catch(err=>{
+console.error(err);
 
 });
 
-
+});
 
 
 client.login(TOKEN);
