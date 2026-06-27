@@ -220,6 +220,10 @@ interaction.isChatInputCommand() &&
 interaction.commandName==="visiontest"
 ){
 
+await interaction.deferReply({
+ephemeral:true
+});
+
 
 const exists = await User.findOne({
 userId:interaction.user.id
@@ -228,10 +232,11 @@ userId:interaction.user.id
 
 if(exists){
 
-return interaction.reply({
+return interaction.editReply({
+
 content:
-"✨ Your fate has already been decided. You only receive one Vision.",
-ephemeral:true
+"✨ Your fate has already been decided. You only receive one Vision."
+
 });
 
 }
@@ -251,11 +256,12 @@ geo:0,
 electro:0,
 dendro:0
 }
-});
+}
+);
 
 
 
-return interaction.reply({
+return interaction.editReply({
 
 content:
 `✨ Vision Ceremony ✨
@@ -264,9 +270,7 @@ ${questions[0].q}`,
 
 components:[
 makeButtons(interaction.user.id)
-],
-
-ephemeral:true
+]
 
 });
 
