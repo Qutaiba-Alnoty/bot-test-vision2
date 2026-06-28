@@ -249,7 +249,7 @@ client.on("guildMemberUpdate", async (oldMember, newMember) => {
 
     const currentName = newMember.nickname || newMember.displayName;
     const cleanName = currentName.replace(/^[🌱🧭⚔️🛡️⭐👑]\s*/, "").trim();
-    const targetNickname = `${emoji} ${cleanName}`;
+    const targetNickname = `${emoji}${cleanName}`;
 
     if (currentName === targetNickname) return;
 
