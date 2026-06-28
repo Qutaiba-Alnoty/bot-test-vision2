@@ -419,14 +419,6 @@ makeButtons(interaction.user.id)
 
 // 🌟 Rank Emoji Nickname System
 
-const { Client, GatewayIntentBits } = require('discord.js');
-const client = new Client({
-intents: [
-GatewayIntentBits.Guilds,
-GatewayIntentBits.GuildMembers
- ]
-});
-
 client.on("guildMemberUpdate", async (oldMember, newMember) => {
 if (oldMember.nickname === newMember.nickname) return;
 
