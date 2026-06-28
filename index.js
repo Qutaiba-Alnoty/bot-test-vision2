@@ -420,85 +420,41 @@ makeButtons(interaction.user.id)
 
 // 🌟 Rank Emoji Nickname System
 
-const { Client, GatewayIntentBits } = require("discord.js");
-require("dotenv").config();
+client.on("guildMemberUpdate", async (oldMember, newMember) => 
+{ const ranks = {
+ "👑 Archon": "👑",
+ "⭐ Grandmaster": "⭐", 
+"🛡️ Captain": "🛡️", 
+"⚔️ Honorary Knight": "⚔️",
+ "🧭 Adventurer": "🧭",
+ "🌱 Traveler": "🌱" 
+};
+const order = [ 
+"👑 Archon",
+ "⭐ Grandmaster", 
+"🛡️ Captain",
+ "⚔️ Honorary Knight",
+ "🧭 Adventurer",
+ "🌱 Traveler" 
+];
+let emoji = null;
+ for (const roleName of order) {
+ if (newMember.roles.cache.some(role => role.name === roleName)) { 
+emoji = ranks[roleName]; break;
+ }
+ }
+if (!emoji) return;
+ if (!newMember.manageable) return;
+ let nickname = newMember.nickname || newMember.user.username;
+ nickname = nickname.replace(/^[🌱🧭⚔️🛡️⭐👑]\s*/, "").trim();
 
-const client = new Client({
-    intents: [
-        GatewayIntentBits.Guilds,
-        GatewayIntentBits.GuildMembers,
-        GatewayIntentBits.GuildMessages,
-        GatewayIntentBits.MessageContent
-    ]
+ const target = `${emoji} ${nickname}`;
+ if (newMember.nickname === target) return; 
+try { await newMember.setNickname(target); 
+} catch (err) { 
+console.error(err); 
+} 
 });
-
-
-client.once("ready", () => {
-    console.log(`✅ Logged in as ${client.user.tag}`);
-});
-
-
-client.on("guildMemberUpdate", async (oldMember, newMember) => {
-
-    if (oldMember.nickname === newMember.nickname) return;
-
-    const rankEmojis = {
-        "🌱 Traveler": "🌱",
-        "🧭 Adventurer": "🧭",
-        "⚔️ Honorary Knight": "⚔️",
-        "🛡️ Captain": "🛡️",
-        "⭐ Grandmaster": "⭐",
-        "👑 Archon": "👑"
-    };
-
-    let emoji = null;
-
-    for (const role of newMember.roles.cache.values()) {
-        if (rankEmojis[role.name]) {
-            emoji = rankEmojis[role.name];
-            break;
-        }
-    }
-
-    if (!emoji) return;
-
-
-    let name = newMember.nickname || newMember.user.username;
-
-    let cleanName = name
-        .replace(/^[🌱🧭⚔️🛡️⭐👑]\s*/, "")
-        .trim();
-
-
-    let finalName = `${emoji} ${cleanName}`;
-
-
-    if (name !== finalName) {
-        try {
-            await newMember.setNickname(finalName);
-            console.log(`Nickname updated: ${newMember.user.tag}`);
-        } catch (error) {
-            console.log("Nickname error:", error.message);
-        }
-    }
-
-});
-
-
-// Render keep alive
-const http = require("http");
-
-const PORT = process.env.PORT || 3000;
-
-http.createServer((req, res) => {
-    res.writeHead(200);
-    res.end("Bot is alive!");
-}).listen(PORT, "0.0.0.0", () => {
-    console.log(`🌐 Server running on ${PORT}`);
-});
-
-
-client.login(process.env.TOKEN);
 
 
 
