@@ -26,6 +26,7 @@ ButtonStyle
 
 
 const TOKEN = process.env.TOKEN;
+client.login(TOKEN);
 
 
 // MongoDB connection
