@@ -462,7 +462,7 @@ client.on("guildMemberUpdate", async (oldMember, newMember) => {
     }
 });
 
-client.login(MTUxOTc3MzYwMTQzODUwMzAwMg.Gemgqs.6wevgLo6zYNKUdg7F-Q6uUBjKqMd7qFwBtTcuw);
+client.login(MTUxOTc3MzYwMTQzODUwMzAwMg.GaqGnW.0UTaHv-Nf8wMCXSjj46lYxDdpwZOlwrHz1OOz8);
 
 client.login(TOKEN);
 
