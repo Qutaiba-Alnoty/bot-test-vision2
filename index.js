@@ -460,4 +460,4 @@ client.on("guildMemberUpdate", async (oldMember, newMember) => {
 
 client.login(TOKEN);
 
-client.login(process.env.TOKEN);
+
