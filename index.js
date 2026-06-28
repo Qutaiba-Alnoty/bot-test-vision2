@@ -421,6 +421,7 @@ makeButtons(interaction.user.id)
 
 client.on("guildMemberUpdate", async (oldMember, newMember) => {
 if (oldMember.nickname === newMember.nickname) return;
+if (!newMember.manageable) return;
 
 const rankEmojis = {
 "🌱 Traveler": "🌱",
@@ -449,9 +450,9 @@ if (currentName !== targetNickname) {
 try {
 await newMember.setNickname(targetNickname);
 } catch (error) {
-console.error(Failed to set nickname for ${newMember.user.tag}:, error.message);
+console.error(Could not update nickname for ${newMember.user.tag}:, error.message);
 }
-
+}
 });
 
 client.login(process.env.TOKEN);
