@@ -464,7 +464,4 @@ console.error(Failed to set nickname for ${newMember.user.tag}:, error.message);
 
 client.login(process.env.TOKEN);
 
-client.login(TOKEN);
 
-
-client.login(TOKEN);
