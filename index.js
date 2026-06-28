@@ -420,39 +420,40 @@ makeButtons(interaction.user.id)
 // 🌟 Rank Emoji Nickname System
 
 client.on("guildMemberUpdate", async (oldMember, newMember) => {
-if (oldMember.nickname === newMember.nickname) return;
-if (!newMember.manageable) return;
+    if (oldMember.nickname === newMember.nickname) return;
 
-const rankEmojis = {
-"🌱 Traveler": "🌱",
-"🧭 Adventurer": "🧭",
-"⚔️ Honorary Knight": "⚔️",
-"🛡️ Captain": "🛡️",
-"⭐ Grandmaster": "⭐",
-"👑 Archon": "👑"
-};
+    const rankEmojis = {
+        "🌱 Traveler": "🌱",
+        "🧭 Adventurer": "🧭",
+        "⚔️ Honorary Knight": "⚔️",
+        "🛡️ Captain": "🛡️",
+        "⭐ Grandmaster": "⭐",
+        "👑 Archon": "👑"
+    };
 
-let emoji = null;
+    let emoji = null;
 
-for (const role of newMember.roles.cache.values()) {
-if (rankEmojis[role.name]) {
-emoji = rankEmojis[role.name];
-}
-}
+    for (const role of newMember.roles.cache.values()) {
+        if (rankEmojis[role.name]) {
+            emoji = rankEmojis[role.name];
+            break;
+        }
+    }
 
-if (!emoji) return;
+    if (!emoji) return;
 
-let currentName = newMember.nickname || newMember.displayName;
-let cleanName = currentName.replace(/^[🌱🧭⚔️🛡️⭐👑]\s*/, "").trim();
-const targetNickname = ${emoji} ${cleanName};
+    let currentName = newMember.nickname || newMember.displayName;
+    let cleanName = currentName.replace(/^[🌱🧭⚔️🛡️⭐👑]\s*/, "").trim();
 
-if (currentName !== targetNickname) {
-try {
-await newMember.setNickname(targetNickname);
-} catch (error) {
-console.error(Could not update nickname for ${newMember.user.tag}:, error.message);
-}
-}
+    const targetNickname = `${emoji} ${cleanName}`;
+
+    if (currentName !== targetNickname) {
+        try {
+            await newMember.setNickname(targetNickname);
+        } catch (error) {
+            console.error(`Failed to set nickname for ${newMember.user.tag}:`, error.message);
+        }
+    }
 });
 
 client.login(process.env.TOKEN);
