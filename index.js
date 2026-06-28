@@ -419,56 +419,50 @@ makeButtons(interaction.user.id)
 
 // 🌟 Rank Emoji Nickname System
 
-// 🌟 Rank Emoji Nickname System
-
-client.on("guildMemberUpdate", async (oldMember, newMember) => {
-
-const rankEmojis = {
-
-"🌱 Traveler":"🌱",
-"🧭 Adventurer":"🧭",
-"⚔️ Honorary Knight":"⚔️",
-"🛡️ Captain":"🛡️",
-"⭐ Grandmaster":"⭐",
-"👑 Archon":"👑"
-
-};
-
-
-let emoji = null;
-
-
-for (const role of newMember.roles.cache.values()) {
-
-if (rankEmojis[role.name]) {
-
-emoji = rankEmojis[role.name];
-
-}
-
-}
-
-
-if (!emoji) return;
-
-
-let nickname =
-newMember.nickname ||
-newMember.user.username;
-
-
-nickname = nickname
-.replace(/^[🌱🧭⚔️🛡️⭐👑]\s*/, "")
-.trim();
-
-
-await newMember.setNickname(
-`${emoji}${nickname}`
-).catch(()=>{});
-
-
+const { Client, GatewayIntentBits } = require('discord.js');
+const client = new Client({
+    intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMembers
+    ]
 });
 
+client.on("guildMemberUpdate", async (oldMember, newMember) => {
+    if (oldMember.nickname === newMember.nickname) return;
+
+    const rankEmojis = {
+        "🌱 Traveler": "🌱",
+        "🧭 Adventurer": "🧭",
+        "⚔️ Honorary Knight": "⚔️",
+        "🛡️ Captain": "🛡️",
+        "⭐ Grandmaster": "⭐",
+        "👑 Archon": "👑"
+    };
+
+    let emoji = null;
+
+    for (const role of newMember.roles.cache.values()) {
+        if (rankEmojis[role.name]) {
+            emoji = rankEmojis[role.name];
+        }
+    }
+
+    if (!emoji) return;
+
+    let currentName = newMember.nickname || newMember.user.username;
+    let cleanName = currentName.replace(/^[🌱🧭⚔️🛡️⭐👑]\s*/, "").trim();
+    const targetNickname = `${emoji} ${cleanName}`;
+
+    if (currentName !== targetNickname) {
+        try {
+            await newMember.setNickname(targetNickname);
+        } catch (error) {
+            console.error(`Failed to set nickname for ${newMember.user.tag}:`, error.message);
+        }
+    }
+});
+
+client.login("YOUR_BOT_TOKEN_HERE");
 
 client.login(TOKEN);
 
