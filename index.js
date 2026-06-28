@@ -454,6 +454,7 @@ client.on("guildMemberUpdate", async (oldMember, newMember) => {
     } catch (err) {
         console.error(err);
     }
+ client.login(process.env.TOKEN);
 });
 
 client.login(TOKEN);
