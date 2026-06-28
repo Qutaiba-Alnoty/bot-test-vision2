@@ -462,7 +462,7 @@ client.on("guildMemberUpdate", async (oldMember, newMember) => {
     }
 });
 
-client.login("YOUR_BOT_TOKEN_HERE");
+client.login(MTUxOTc3MzYwMTQzODUwMzAwMg.Gemgqs.6wevgLo6zYNKUdg7F-Q6uUBjKqMd7qFwBtTcuw);
 
 client.login(TOKEN);
 
