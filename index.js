@@ -433,14 +433,14 @@ const client = new Client({
 });
 
 
-// Bot ready
 client.once("ready", () => {
     console.log(`✅ Logged in as ${client.user.tag}`);
 });
 
 
-// Rank nickname updater
 client.on("guildMemberUpdate", async (oldMember, newMember) => {
+
+    if (oldMember.nickname === newMember.nickname) return;
 
     const rankEmojis = {
         "🌱 Traveler": "🌱",
@@ -462,22 +462,26 @@ client.on("guildMemberUpdate", async (oldMember, newMember) => {
 
     if (!emoji) return;
 
-    let currentName = newMember.nickname || newMember.user.username;
 
-    let cleanName = currentName
+    let name = newMember.nickname || newMember.user.username;
+
+    let cleanName = name
         .replace(/^[🌱🧭⚔️🛡️⭐👑]\s*/, "")
         .trim();
 
-    const newNickname = `${emoji} ${cleanName}`;
 
-    if (currentName !== newNickname) {
+    let finalName = `${emoji} ${cleanName}`;
+
+
+    if (name !== finalName) {
         try {
-            await newMember.setNickname(newNickname);
-            console.log(`Changed nickname for ${newMember.user.tag}`);
-        } catch (err) {
-            console.log("Nickname error:", err.message);
+            await newMember.setNickname(finalName);
+            console.log(`Nickname updated: ${newMember.user.tag}`);
+        } catch (error) {
+            console.log("Nickname error:", error.message);
         }
     }
+
 });
 
 
@@ -494,7 +498,6 @@ http.createServer((req, res) => {
 });
 
 
-// Login
 client.login(process.env.TOKEN);
 
 
