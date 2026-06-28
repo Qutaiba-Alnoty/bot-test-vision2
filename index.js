@@ -456,7 +456,7 @@ console.error(err);
 } 
 });
 
-
+client.login(process.env.TOKEN);
 
 
 
