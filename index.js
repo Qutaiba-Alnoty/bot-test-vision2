@@ -419,16 +419,7 @@ makeButtons(interaction.user.id)
 
 // 🌟 Rank Emoji Nickname System
 
-const { Client, GatewayIntentBits } = require('discord.js');
-const client = new Client({
-    intents: [
-        GatewayIntentBits.Guilds,
-        GatewayIntentBits.GuildMembers
-    ]
-});
-
 client.on("guildMemberUpdate", async (oldMember, newMember) => {
-    if (oldMember.nickname === newMember.nickname) return;
 
     const rankEmojis = {
         "🌱 Traveler": "🌱",
@@ -449,20 +440,21 @@ client.on("guildMemberUpdate", async (oldMember, newMember) => {
 
     if (!emoji) return;
 
-    let currentName = newMember.nickname || newMember.user.username;
-    let cleanName = currentName.replace(/^[🌱🧭⚔️🛡️⭐👑]\s*/, "").trim();
+    const currentName = newMember.nickname || newMember.user.username;
+
+    const cleanName = currentName.replace(/^[🌱🧭⚔️🛡️⭐👑]\s*/, "").trim();
+
     const targetNickname = `${emoji} ${cleanName}`;
 
-    if (currentName !== targetNickname) {
-        try {
-            await newMember.setNickname(targetNickname);
-        } catch (error) {
-            console.error(`Failed to set nickname for ${newMember.user.tag}:`, error.message);
-        }
+    if (currentName === targetNickname) return;
+
+    try {
+        await newMember.setNickname(targetNickname);
+        console.log(`Updated nickname for ${newMember.user.tag}`);
+    } catch (err) {
+        console.error(err);
     }
 });
-
-client.login(MTUxOTc3MzYwMTQzODUwMzAwMg.GaqGnW.0UTaHv-Nf8wMCXSjj46lYxDdpwZOlwrHz1OOz8);
 
 client.login(TOKEN);
 
