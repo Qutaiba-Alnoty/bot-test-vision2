@@ -1,12 +1,20 @@
+
 {
   "name": "vision-bot",
   "version": "1.0.1",
   "main": "index.js",
+  "engines": {
+    "node": "22.x"
+  },
   "scripts": {
     "start": "node index.js"
   },
   "dependencies": {
-  "discord.js": "^14.0.0",
-  "mongoose": "^8.0.0"
+    "discord.js": "^14.0.0",
+    "mongoose": "^8.0.0"
+  }
 }
-}
+
+
+
+
