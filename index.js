@@ -253,7 +253,10 @@ client.on(Events.InteractionCreate, async interaction => {
 });
 
 client.on("guildMemberUpdate", async (oldMember, newMember) => {
-    if (oldMember.nickname === newMember.nickname) return;
+   if (
+    oldMember.nickname === newMember.nickname &&
+    oldMember.roles.cache.equals(newMember.roles.cache)
+) return;
     if (!newMember.manageable) return;
 
     const rankEmojis = {
