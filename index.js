@@ -13,6 +13,18 @@ const {
     ButtonStyle
 } = require("discord.js");
 
+
+
+process.on("unhandledRejection", err => {
+    console.error("Unhandled Promise:", err);
+});
+
+process.on("uncaughtException", err => {
+    console.error("Uncaught Exception:", err);
+});
+
+
+
 const PORT = process.env.PORT || 3000;
 http.createServer((req, res) => {
     res.writeHead(200);
@@ -259,6 +271,25 @@ client.on("guildMemberUpdate", async (oldMember, newMember) => {
     } catch (err) {
         console.error(`Could not edit nickname for ${newMember.user.tag}:`, err.message);
     }
+});
+client.once(Events.ClientReady, c => {
+    console.log(`✅ Logged in as ${c.user.tag}`);
+});
+
+client.on("error", error => {
+    console.error("Discord client error:", error);
+});
+
+client.on("shardDisconnect", (event) => {
+    console.log("❌ Discord disconnected:", event);
+});
+
+client.on("shardReconnecting", () => {
+    console.log("🔄 Discord reconnecting...");
+});
+
+client.on("shardResume", () => {
+    console.log("✅ Discord connection resumed");
 });
 
 client.login(TOKEN);
