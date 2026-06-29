@@ -40,6 +40,22 @@ const client = new Client({
     ]
 });
 
+client.on("shardDisconnect", (event) => {
+    console.log("❌ Disconnected from Discord", event.code);
+});
+
+client.on("shardReconnecting", () => {
+    console.log("🔄 Trying to reconnect...");
+});
+
+client.on("shardResume", () => {
+    console.log("✅ Reconnected to Discord");
+});
+
+client.on("invalidated", () => {
+    console.log("⚠️ Session invalidated");
+});
+
 const TOKEN = process.env.TOKEN;
 const CLIENT_ID = "1519773601438503002";
 const GUILD_ID = "1519659693025525881";
